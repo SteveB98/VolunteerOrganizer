@@ -1,0 +1,16 @@
+name: VolunteerOrganizer
+
+channels:
+  - defaults
+  - conda-forge
+
+dependencies:
+  - python=3.9.13
+  - gooey=1.0.8.1
+  - openpyxl = 3.0.10
+  - pandas = 1.4.4
+  - pip=22.2.2
+  - numpy = 1.23.1
+    
+  
+    
