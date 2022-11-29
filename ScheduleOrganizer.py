@@ -1,5 +1,5 @@
 from gooey import Gooey, GooeyParser
-from openpyxl.styles import PatternFill, Font, Alignment
+from openpyxl.styles import PatternFill, Font, Alignment, Border, Side
 import os
 import mkl
 import json
@@ -87,6 +87,14 @@ def parse_args():
     #Return parser function to main                    
     return parser.parse_args()
 
+def create_cell_border(cell):
+        thin_border = Border(left=Side(style='thin'), 
+                     right=Side(style='thin'), 
+                     top=Side(style='thin'), 
+                     bottom=Side(style='thin'))
+        cell.border = thin_border
+
+
 if __name__ == '__main__':
     print("Creating Venue Schedule Grid")
     wb = pyxl.load_workbook("C:\\Users\\12508\\Documents\\ProgrammingStuff\\VolunteerOrganizer\\Test.xlsm", keep_vba=True)
@@ -121,25 +129,50 @@ if __name__ == '__main__':
     sheet['A4'] = args.Shift_Time
     sheet['A4'].font = font
     sheet['A4'].alignment = align
+    create_cell_border(sheet['A1'])
+    create_cell_border(sheet['A4'])
     sheet.column_dimensions['A'].width = len(args.Venue_Name) #Figure out good cell width value
     sheet.row_dimensions[1].height = 30
     sheet.row_dimensions[4].height = 30 
     #Generate columns based on number of performance days, length based on # volunteer positions and supervisor positions;
     sheet.merge_cells(start_row=1, start_column=1,end_row=1,end_column=int(args.Number_of_Shows))
     sheet.merge_cells(start_row=4, start_column=1,end_row=4,end_column=int(args.Number_of_Shows))
-    counter = 0
-    pos_index = 0
-    start = 5
+    sheet['A1'].fill = PatternFill("solid", fgColor="FFC3A8")
     #For each possible volunteer position, format cells with or without a supervisor slot and with the user-inputted # of volunteer slots
-    for vols in pos_vols:
-        if int(vols) !=0:
-            sheet.cell(row=start+counter,column=1).value = pos_names[pos_index] #Inserting Volunteer Position into cell
-            if pos_names[pos_index] in args.Supervisor_Positions: 
-                sheet.cell(row=start+counter+1,column=1,value = pos_names[pos_index])
-                counter +=1
-            for i in range(int(vols)): sheet.cell(row=start+counter+1+i,column=1,value = 'Test')
-            counter +=int(vols)+1
-        pos_index +=1
+    col_count = 0
+    start = 5
+    for i in range(int(args.Number_of_Shows)):
+        counter = 0
+        pos_index = 0
+        for vols in pos_vols:
+                if int(vols) !=0:
+                        merged = 0
+                        cell = sheet.cell(row=start+counter,column=1+col_count)
+                        for mergedCell in sheet.merged_cells.ranges:
+                                if cell.coordinate in mergedCell:
+                                        merged = 1
+                                        break
+                        if merged == 0:
+                                print('Inserting Position Name into row: ' + str(counter+start))
+                                cell = sheet.cell(row=start+counter,column=1+col_count)
+                                create_cell_border(cell)
+                                cell.value = pos_names[pos_index] #Inserting Volunteer Position into cell
+                                sheet.merge_cells(start_row=start+counter, start_column=1,end_row=start+counter,end_column=int(args.Number_of_Shows))
+                                sheet.cell(row=start+counter,column=1+col_count).alignment = align
+                        counter += 1
+                        cell = sheet.cell(row=start+counter,column=1+col_count).value = args.Shift_Time
+                        if pos_names[pos_index] in args.Supervisor_Positions: 
+                                print('Inserting Supervisor into row: ' + str(start+counter+1))
+                                sheet.cell(row=start+counter+1,column=1+col_count,value = pos_names[pos_index] + ' Supervisor')
+                                create_cell_border(sheet.cell(row=start+counter+1,column=1+col_count))
+                                counter +=1
+                        for j in range(int(vols)): 
+                                sheet.cell(row=start+counter+1+j,column=1+col_count,value = 'Test')
+                                print('Inserting volunteer into row: ' +str(start+counter+1+j))
+                                create_cell_border(sheet.cell(row=start+counter+1+j,column=1+col_count))
+                        counter +=int(vols)+1
+                pos_index +=1
+        col_count +=1
     #cross-examine Supervisor_Positions in cell exclusion case
 
     #Create cell formatting (size, colour, etc)
@@ -154,7 +187,6 @@ if __name__ == '__main__':
     #sheet['A4'] = str(args.Supervisor_Positions)
     #sheet['A5'] = args.Number_of_Shows
 
-    sheet['A1'].fill = PatternFill("solid", fgColor="DDDDDD")
     wb.save("Test.xlsm")
         
     print("Done")
