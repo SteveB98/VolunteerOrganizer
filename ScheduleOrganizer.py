@@ -32,7 +32,12 @@ def parse_args():
                         action='store',
                         default=stored_args.get('Shift_Time'),
                         help='Specify the approximate shift length')
-
+    #Universal Shift Time Check
+    parser.add_argument('--Universal_Shift_Time',
+                        default=stored_args.get('Universal_Shift_Time'),
+                        help='Will this venue have a single shift time?',
+                        widget = 'CheckBox',
+                        action='store_true')
     #Venue Positions, selected based on # of vols (if 0, then role is not needed)
     parser.add_argument('--BG_Vols',
                 action='store',
@@ -94,6 +99,13 @@ def create_cell_border(cell):
                      bottom=Side(style='thin'))
         cell.border = thin_border
 
+def is_merged(cell,sheet):
+        merged = 0
+        for mergedCell in sheet.merged_cells.ranges:
+                if cell.coordinate in mergedCell:
+                        merged = 1
+                        break
+        return merged
 
 if __name__ == '__main__':
     print("Creating Venue Schedule Grid")
@@ -104,6 +116,7 @@ if __name__ == '__main__':
     args = parse_args()
     #print(args.Venue_Name)
     #print(args.Number_of_Shows)
+    print(args.Universal_Shift_Time)
     pos_vols = [args.BG_Vols,args.FOH_Vols,args.GT_Vols,args.Hosp_Vols,args.Merch_Vols,args.Stage_Vols,args.Sec_Vols]
     pos_names = ['Beer Garden','Front of House','Green Team','Hospitality','Merchandise','Staging','Security']
     #print(pos_vols)
@@ -146,29 +159,43 @@ if __name__ == '__main__':
         pos_index = 0
         for vols in pos_vols:
                 if int(vols) !=0:
-                        merged = 0
+                        #Position Name Cell
                         cell = sheet.cell(row=start+counter,column=1+col_count)
-                        for mergedCell in sheet.merged_cells.ranges:
-                                if cell.coordinate in mergedCell:
-                                        merged = 1
-                                        break
+                        merged = is_merged(cell,sheet)
+                        print(merged)
                         if merged == 0:
-                                print('Inserting Position Name into row: ' + str(counter+start))
+                                #print('Inserting Position Name into row: ' + str(counter+start))
                                 cell = sheet.cell(row=start+counter,column=1+col_count)
                                 create_cell_border(cell)
                                 cell.value = pos_names[pos_index] #Inserting Volunteer Position into cell
                                 sheet.merge_cells(start_row=start+counter, start_column=1,end_row=start+counter,end_column=int(args.Number_of_Shows))
                                 sheet.cell(row=start+counter,column=1+col_count).alignment = align
+                        #Shift Time Cell
                         counter += 1
-                        cell = sheet.cell(row=start+counter,column=1+col_count).value = args.Shift_Time
+                        cell = sheet.cell(row=start+counter,column=1+col_count)
+                        merged = is_merged(cell,sheet)
+                        print(merged)
+                        
+                        #Shift Time Cell Merge Requirement Check
+                        if args.Universal_Shift_Time == True and merged == 0:
+                                 #print('Merging Shift Time Cells at row: ' + counter+start)
+                                create_cell_border(cell)
+                                cell.value = args.Shift_Time
+                                sheet.merge_cells(start_row=start+counter, start_column=1,end_row=start+counter,end_column=int(args.Number_of_Shows))
+                        if args.Universal_Shift_Time == None:
+                                create_cell_border(cell)
+                                cell.value = args.Shift_Time    
+                        sheet.cell(row=start+counter,column=1+col_count).alignment = align
+                        #Supervisor Insertion
                         if pos_names[pos_index] in args.Supervisor_Positions: 
-                                print('Inserting Supervisor into row: ' + str(start+counter+1))
+                                #print('Inserting Supervisor into row: ' + str(start+counter+1))
                                 sheet.cell(row=start+counter+1,column=1+col_count,value = pos_names[pos_index] + ' Supervisor')
                                 create_cell_border(sheet.cell(row=start+counter+1,column=1+col_count))
                                 counter +=1
+                        #Volunteer Insertion
                         for j in range(int(vols)): 
                                 sheet.cell(row=start+counter+1+j,column=1+col_count,value = 'Test')
-                                print('Inserting volunteer into row: ' +str(start+counter+1+j))
+                                #print('Inserting volunteer into row: ' +str(start+counter+1+j))
                                 create_cell_border(sheet.cell(row=start+counter+1+j,column=1+col_count))
                         counter +=int(vols)+1
                 pos_index +=1
