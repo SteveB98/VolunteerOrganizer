@@ -92,6 +92,16 @@ def parse_args():
     #Return parser function to main                    
     return parser.parse_args()
 
+#Cell: Cell Coordinates, Sheet: Sheet Obj, Ref_Sheet: Reference Sheet Title
+def insert_sheet_list(cells,sheet,ref_sheet):
+        #print(str("="+ref_sheet+"!"+cells))
+        sheet_call = ref_sheet+"!"
+        space_formula = '&" "&'
+        sheet['A1'].value = str("="+sheet_call+str(cells[0])+space_formula+sheet_call+str(cells[1])+space_formula+sheet_call+str(cells[2])+space_formula+sheet_call+str(cells[3]))
+        print(sheet["A1"].value)
+      
+
+
 def create_cell_border(cell):
         thin_border = Border(left=Side(style='thin'), 
                      right=Side(style='thin'), 
@@ -111,12 +121,14 @@ if __name__ == '__main__':
     print("Creating Venue Schedule Grid")
     wb = pyxl.load_workbook("C:\\Users\\12508\\Documents\\ProgrammingStuff\\VolunteerOrganizer\\Test.xlsm", keep_vba=True)
     sheet = wb.active
-    sheet.title = 'Hello World'
+    sheet.title = 'HelloWorld'
+    wb.create_sheet("ShiftList")
+    sheet_list = wb['ShiftList']
     wb.save("Test.xlsm")
     args = parse_args()
     #print(args.Venue_Name)
     #print(args.Number_of_Shows)
-    print(args.Universal_Shift_Time)
+    #print(args.Universal_Shift_Time)
     pos_vols = [args.BG_Vols,args.FOH_Vols,args.GT_Vols,args.Hosp_Vols,args.Merch_Vols,args.Stage_Vols,args.Sec_Vols]
     pos_names = ['Beer Garden','Front of House','Green Team','Hospitality','Merchandise','Staging','Security']
     #print(pos_vols)
@@ -139,30 +151,38 @@ if __name__ == '__main__':
     sheet['A1'] = args.Venue_Name
     sheet['A1'].font = font
     sheet['A1'].alignment = align
-    sheet['A4'] = args.Shift_Time
-    sheet['A4'].font = font
-    sheet['A4'].alignment = align
+    #sheet['A4'] = args.Shift_Time
+    #sheet['A4'].font = font
+    #sheet['A4'].alignment = align
     create_cell_border(sheet['A1'])
-    create_cell_border(sheet['A4'])
+    #create_cell_border(sheet['A4'])
     sheet.column_dimensions['A'].width = len(args.Venue_Name) #Figure out good cell width value
     sheet.row_dimensions[1].height = 30
-    sheet.row_dimensions[4].height = 30 
+    #sheet.row_dimensions[4].height = 30 
     #Generate columns based on number of performance days, length based on # volunteer positions and supervisor positions;
     sheet.merge_cells(start_row=1, start_column=1,end_row=1,end_column=int(args.Number_of_Shows))
-    sheet.merge_cells(start_row=4, start_column=1,end_row=4,end_column=int(args.Number_of_Shows))
+    #sheet.merge_cells(start_row=4, start_column=1,end_row=4,end_column=int(args.Number_of_Shows))
     sheet['A1'].fill = PatternFill("solid", fgColor="FFC3A8")
     #For each possible volunteer position, format cells with or without a supervisor slot and with the user-inputted # of volunteer slots
     col_count = 0
-    start = 5
+    start = 4
     for i in range(int(args.Number_of_Shows)):
         counter = 0
         pos_index = 0
+        #Create Date Cell
+        cell = sheet.cell(row=2,column=1+col_count)
+        create_cell_border(cell)
+        cell_date = cell.coordinate
+        wb.save("Test.xlsm")
+        #Create Show Title Cell
+        cell = sheet.cell(row=3,column=1+col_count)
+        create_cell_border(cell)
         for vols in pos_vols:
                 if int(vols) !=0:
                         #Position Name Cell
                         cell = sheet.cell(row=start+counter,column=1+col_count)
                         merged = is_merged(cell,sheet)
-                        print(merged)
+                        #print(merged)
                         if merged == 0:
                                 #print('Inserting Position Name into row: ' + str(counter+start))
                                 cell = sheet.cell(row=start+counter,column=1+col_count)
@@ -170,12 +190,14 @@ if __name__ == '__main__':
                                 cell.value = pos_names[pos_index] #Inserting Volunteer Position into cell
                                 sheet.merge_cells(start_row=start+counter, start_column=1,end_row=start+counter,end_column=int(args.Number_of_Shows))
                                 sheet.cell(row=start+counter,column=1+col_count).alignment = align
+                                cell_position = cell.coordinate
+                        else: cell_position = cell.coordinate
                         #Shift Time Cell
                         counter += 1
                         cell = sheet.cell(row=start+counter,column=1+col_count)
                         merged = is_merged(cell,sheet)
-                        print(merged)
-                        
+                        #Debugging Print Statement
+                        #print(merged)
                         #Shift Time Cell Merge Requirement Check
                         if args.Universal_Shift_Time == True and merged == 0:
                                  #print('Merging Shift Time Cells at row: ' + counter+start)
@@ -186,6 +208,9 @@ if __name__ == '__main__':
                                 create_cell_border(cell)
                                 cell.value = args.Shift_Time    
                         sheet.cell(row=start+counter,column=1+col_count).alignment = align
+                        cell_time = cell.coordinate
+                        cell_venue = sheet.cell(row=1,column=1)
+                        insert_sheet_list([cell_date,cell_venue.coordinate,cell_position,cell_time],sheet_list,sheet.title)
                         #Supervisor Insertion
                         if pos_names[pos_index] in args.Supervisor_Positions: 
                                 #print('Inserting Supervisor into row: ' + str(start+counter+1))
@@ -213,7 +238,7 @@ if __name__ == '__main__':
     #sheet['A3'] = str(args.Volunteer_Supervisor_Positions)
     #sheet['A4'] = str(args.Supervisor_Positions)
     #sheet['A5'] = args.Number_of_Shows
-
+    del wb['ShiftList1']
     wb.save("Test.xlsm")
         
     print("Done")
