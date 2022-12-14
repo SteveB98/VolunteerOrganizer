@@ -4,12 +4,6 @@ import os
 import mkl
 import json
 import openpyxl as pyxl
-
-#Global Variables
-wb = pyxl.load_workbook("C:\\Users\\12508\\Documents\\ProgrammingStuff\\VolunteerOrganizer\\Test.xlsm", keep_vba=True)
-sheet = wb.active
-wb.save("Test.xlsm")
-
 @Gooey(program_name="Venue Grid Generator")
 def parse_args():
     """ Use GooeyParser to build up the arguments we will use in our script
@@ -17,8 +11,7 @@ def parse_args():
     every time we run the script.
     """
     stored_args = {}
-    # get the script name without the extension & use it to build up
-    # the json filename
+    # get the script name without the extension & use it to build up the json filename
     script_name = os.path.splitext(os.path.basename(__file__))[0]
     args_file = "{}-args.json".format(script_name)
     # Read in the prior arguments as a dictionary
@@ -27,6 +20,10 @@ def parse_args():
             stored_args = json.load(data_file)
     parser = GooeyParser(description='Produce a Venue Schedule')
     #Creating Dimensions for schedule grid
+    #File Name
+    parser.add_argument('File_Name',
+                        help = 'Select the target Microsoft Excel file (MUST be macro-enabled, as a .xlsm file).',
+                        widget ='FileChooser' )
     #Venue Name
     parser.add_argument('Venue_Name',
                         action='store',
@@ -78,8 +75,7 @@ def parse_args():
             action='store',
             widget='IntegerField',
             default=0,
-            help="Specify the number of security volunteers that will be present")
-         
+            help="Specify the number of security volunteers that will be present")      
     #Type of supervisors at venue
     parser.add_argument('Supervisor_Positions',
                         choices=['Beer Garden','Front of House','Green Team','Hospitality','Merchandise','Staging','Security'],
@@ -89,6 +85,15 @@ def parse_args():
                         nargs="+",
                         metavar="Supervisor Positons",
                         help='Specify the work positons for this venue')
+    #Split shift for positions
+    parser.add_argument('--Split_Shifts',
+                        choices=['Beer Garden','Front of House','Green Team','Hospitality','Merchandise','Staging','Security'],
+                        action='store',
+                        default=stored_args.get('Split_Shifts'),
+                        widget='Listbox',
+                        nargs="+",
+                        metavar="Split_Shifts",
+                        help='Specify which work positions will have split shifts')
     #Number of shows taking place at venue
     parser.add_argument('--Number_of_Shows',
                         action='store',
@@ -97,7 +102,6 @@ def parse_args():
                         help="Specify the number of shows happening at this venue")
     #Return parser function to main                    
     return parser.parse_args()
-
 #Cells: [date,venue,position,time], Sheet: Sheet Obj, Ref_Sheet: Reference Sheet Title, Vol_Cell: Value of Volunteer Cell
 def insert_sheet_list(cells,sheet,ref_sheet,vol_cell):
         sheet_call = ref_sheet.title
@@ -124,8 +128,6 @@ def insert_sheet_list(cells,sheet,ref_sheet,vol_cell):
                         cell_shift.value = "="+sheet_call+str(cells[0])+space_formula+sheet_call+str(cells[1])+space_formula+sheet_call+str(position_merge)+space_formula+sheet_call+str(time_value)
                         create_cell_border(cell_shift)
                         break
-        wb.save("Test.xlsm")
-
 #Helper function to create cell borders, given excel cell
 def create_cell_border(cell):
         thin_border = Border(left=Side(style='thin'), 
@@ -133,7 +135,6 @@ def create_cell_border(cell):
                      top=Side(style='thin'), 
                      bottom=Side(style='thin'))
         cell.border = thin_border
-
 #Helper funtion that returns either 0 or 1, if a given cell is within the list of merged cells in a given sheet
 def is_merged(cell,sheet):
         merged = 0
@@ -142,23 +143,25 @@ def is_merged(cell,sheet):
                         merged = 1
                         break
         return merged
-
-#Fix arguments to make non-optional
-#Reformat UI Titles & Descriptions
-#Add internal check to see if venue sheet exists, don't generate a new sheet with same name if so. If not, create a new sheet
-#Create UI argument to pick the filepath of working excel book, oppose to hardcoding value
-#
-    
 #Main Executed Function
 if __name__ == '__main__':
     print("Creating Venue Schedule Grid")
     args = parse_args()
-    sheet.title = args.Venue_Name
+    filename = args.File_Name
+    wb = pyxl.load_workbook(filename, keep_vba=True)
+    wb.save(filename)
+    if args.Venue_Name in wb.sheetnames: 
+        print('Venue Name already used in spreadsheet, exiting generation process')
+        exit()
+    else:
+        wb.create_sheet(args.Venue_Name)
+        sheet = wb[args.Venue_Name]
     if "ShiftList" in wb.sheetnames: sheet_list = wb['ShiftList']
     else:
         wb.create_sheet("ShiftList")
         sheet_list = wb['ShiftList']
-    wb.save("Test.xlsm")
+    print(args.Split_Shifts)
+    wb.save(filename)
     pos_vols = [args.BG_Vols,args.FOH_Vols,args.GT_Vols,args.Hosp_Vols,args.Merch_Vols,args.Stage_Vols,args.Sec_Vols]
     pos_names = ['Beer Garden','Front of House','Green Team','Hospitality','Merchandise','Staging','Security']
     #Pass all variables into excel spreadsheet generator program
@@ -214,32 +217,44 @@ if __name__ == '__main__':
                                 sheet.cell(row=start+counter,column=1+i).alignment = align
                                 cell_position = cell.coordinate
                         else: cell_position = cell.coordinate
-                        #Shift Time Cell
+                        split_shift = True
                         counter += 1
-                        cell = sheet.cell(row=start+counter,column=1+i)
-                        merged = is_merged(cell,sheet)
-                        #Shift Time Cell Merge Requirement Check
-                        if args.Universal_Shift_Time == True and merged == 0:
-                                create_cell_border(cell)
-                                cell.value = args.Shift_Time
-                                sheet.merge_cells(start_row=start+counter, start_column=1,end_row=start+counter,end_column=int(args.Number_of_Shows))
-                        if args.Universal_Shift_Time == None:
-                                create_cell_border(cell)
-                                cell.value = args.Shift_Time
-                        sheet.cell(row=start+counter,column=1+i).alignment = align
-                        cell_time = cell.coordinate
-                        #Supervisor Insertion
-                        if pos_names[pos_index] in args.Supervisor_Positions: 
-                                sheet.cell(row=start+counter+1,column=1+i,value = pos_names[pos_index] + ' Supervisor')
-                                create_cell_border(sheet.cell(row=start+counter+1,column=1+i))
-                                counter +=1
-                        cell_venue = sheet.cell(row=1,column=1)
-                        #Volunteer Insertion
-                        for j in range(int(vols)): 
-                                vol_cell = sheet.cell(row=start+counter+1+j,column=1+i,value = 'Test')
-                                insert_sheet_list([cell_date,cell_venue.coordinate,cell_position,cell_time],sheet_list,sheet,vol_cell)
-                                create_cell_border(sheet.cell(row=start+counter+1+j,column=1+i))
-                        counter +=int(vols)+1
+                        while True:
+                                #Shift Time Cell
+                                cell = sheet.cell(row=start+counter,column=1+i)
+                                merged = is_merged(cell,sheet)
+                                #Shift Time Cell Merge Requirement Check
+                                if args.Universal_Shift_Time == True and merged == 0:
+                                        create_cell_border(cell)
+                                        cell.value = args.Shift_Time
+                                        sheet.merge_cells(start_row=start+counter, start_column=1,end_row=start+counter,end_column=int(args.Number_of_Shows))
+                                if args.Universal_Shift_Time == None:
+                                        create_cell_border(cell)
+                                        cell.value = args.Shift_Time
+                                sheet.cell(row=start+counter,column=1+i).alignment = align
+                                cell_time = cell.coordinate
+                                #Supervisor Insertion
+                                if pos_names[pos_index] in args.Supervisor_Positions: 
+                                        sheet.cell(row=start+counter+1,column=1+i,value = pos_names[pos_index] + ' Supervisor')
+                                        create_cell_border(sheet.cell(row=start+counter+1,column=1+i))
+                                        counter +=1
+                                cell_venue = sheet.cell(row=1,column=1)
+                                #Volunteer Insertion
+                                for j in range(int(vols)): 
+                                        vol_cell = sheet.cell(row=start+counter+1+j,column=1+i,value = 'Test')
+                                        insert_sheet_list([cell_date,cell_venue.coordinate,cell_position,cell_time],sheet_list,sheet,vol_cell)
+                                        wb.save(filename)
+                                        create_cell_border(sheet.cell(row=start+counter+1+j,column=1+i))
+                                counter +=int(vols)+1
+                                if split_shift is False: break
+                                if args.Split_Shifts is None: break
+                                if pos_names[pos_index] in args.Split_Shifts: split_shift = False
+                                else: break
                 pos_index +=1
-    wb.save("Test.xlsm")
+    dims = {}
+    for row in sheet.rows:
+        for cell in row:
+                if cell.value: dims[cell.column_letter] = max((dims.get(cell.column_letter, 0), len(str(cell.value))))  
+    for col, value in dims.items(): sheet.column_dimensions[col].width = value
+    wb.save(filename)
     print("Done")
