@@ -1,114 +1,13 @@
-from gooey import Gooey, GooeyParser
 from openpyxl.styles import PatternFill, Font, Alignment, Border, Side
-import os
-import mkl
-import json
 import openpyxl as pyxl
-@Gooey(program_name="Venue Grid Generator")
-def parse_args():
-    """ Use GooeyParser to build up the arguments we will use in our script
-    Save the arguments in a default json file so that we can retrieve them
-    every time we run the script.
-    """
-    stored_args = {}
-    # get the script name without the extension & use it to build up the json filename
-    script_name = os.path.splitext(os.path.basename(__file__))[0]
-    args_file = "{}-args.json".format(script_name)
-    # Read in the prior arguments as a dictionary
-    if os.path.isfile(args_file):
-        with open(args_file) as data_file:
-            stored_args = json.load(data_file)
-    parser = GooeyParser(description='Produce a Venue Schedule')
-    #Creating Dimensions for schedule grid
-    #File Name
-    parser.add_argument('File_Name',
-                        help = 'Select the target Microsoft Excel file (MUST be macro-enabled, as a .xlsm file).',
-                        widget ='FileChooser' )
-    #Venue Name
-    parser.add_argument('Venue_Name',
-                        action='store',
-                        default=stored_args.get('Venue_Name'),
-                        help='Specify the name of the venue, please use undercases for spaces')
-    #Shift Time
-    parser.add_argument('Shift_Time',
-                        action='store',
-                        default=stored_args.get('Shift_Time'),
-                        help='Specify the approximate shift length')
-    #Universal Shift Time Check
-    parser.add_argument('--Universal_Shift_Time',
-                        default=stored_args.get('Universal_Shift_Time'),
-                        help='Will this venue have a single shift time?',
-                        widget = 'CheckBox',
-                        action='store_true')
-    #Venue Positions, selected based on # of vols (if 0, then role is not needed)
-    parser.add_argument('--BG_Vols',
-                action='store',
-                widget='IntegerField',
-                default=0,
-                help="Specify the number of BG volunteers that will be present")
-    parser.add_argument('--FOH_Vols',
-            action='store',
-            widget='IntegerField',
-            default=0,
-            help="Specify the number of FOH volunteers that will be present")
-    parser.add_argument('--GT_Vols',
-            action='store',
-            widget='IntegerField',
-            default=0,
-            help="Specify the number of Green Team volunteers that will be present")
-    parser.add_argument('--Hosp_Vols',
-            action='store',
-            widget='IntegerField',
-            default=0,
-            help="Specify the number of hospitality volunteers that will be present")
-    parser.add_argument('--Merch_Vols',
-            action='store',
-            widget='IntegerField',
-            default=0,
-            help="Specify the number of merchandise volunteers that will be present")
-    parser.add_argument('--Stage_Vols',
-            action='store',
-            widget='IntegerField',
-            default=0,
-            help="Specify the number of staging volunteers that will be present")
-    parser.add_argument('--Sec_Vols',
-            action='store',
-            widget='IntegerField',
-            default=0,
-            help="Specify the number of security volunteers that will be present")      
-    #Type of supervisors at venue
-    parser.add_argument('Supervisor_Positions',
-                        choices=['Beer Garden','Front of House','Green Team','Hospitality','Merchandise','Staging','Security'],
-                        action='store',
-                        default=stored_args.get('Supervisor_Positons'),
-                        widget='Listbox',
-                        nargs="+",
-                        metavar="Supervisor Positons",
-                        help='Specify the work positons for this venue')
-    #Split shift for positions
-    parser.add_argument('--Split_Shifts',
-                        choices=['Beer Garden','Front of House','Green Team','Hospitality','Merchandise','Staging','Security'],
-                        action='store',
-                        default=stored_args.get('Split_Shifts'),
-                        widget='Listbox',
-                        nargs="+",
-                        metavar="Split_Shifts",
-                        help='Specify which work positions will have split shifts')
-    #Number of shows taking place at venue
-    parser.add_argument('--Number_of_Shows',
-                        action='store',
-                        default=1,
-                        widget='IntegerField',
-                        help="Specify the number of shows happening at this venue")
-    #Return parser function to main                    
-    return parser.parse_args()
+from .ScheduleUI import parse_args
+
 #Cells: [date,venue,position,time], Sheet: Sheet Obj, Ref_Sheet: Reference Sheet Title, Vol_Cell: Value of Volunteer Cell
 def insert_sheet_list(cells,sheet,ref_sheet,vol_cell):
         sheet_call = ref_sheet.title
         space_formula = '&" "&'
-        #Apostrophe in Sheet title check, replace with double apostrophe if so
+        #Apostrophe & Spaces in Sheet Title Check w/ Replacement
         if sheet_call.find("'") != -1: sheet_call = sheet_call.replace("'","\'\'")
-        #Space check in sheet title, insert single quotes around title if so
         if sheet_call.find(" ") != -1: sheet_call = "'"+sheet_call+"'"
         sheet_call = sheet_call+"!"
         #Finding inital cell for position cells, does the same to time cells if universal shift time is required
@@ -246,11 +145,14 @@ if __name__ == '__main__':
                                         wb.save(filename)
                                         create_cell_border(sheet.cell(row=start+counter+1+j,column=1+i))
                                 counter +=int(vols)+1
+                                #Split Shift Check, switching boolean flag to break on repeat. Breaks if None otherwise
                                 if split_shift is False: break
                                 if args.Split_Shifts is None: break
                                 if pos_names[pos_index] in args.Split_Shifts: split_shift = False
                                 else: break
                 pos_index +=1
+    #Adjusting column width of entire sheet, based on maximum cell value length
+    #Taking filled active cell values maximum value & adjusting global column widths
     dims = {}
     for row in sheet.rows:
         for cell in row:
