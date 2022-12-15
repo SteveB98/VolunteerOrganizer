@@ -2,6 +2,12 @@ from gooey import Gooey, GooeyParser
 import os
 import mkl
 import json
+"""
+Program: ScheduleUI.py
+Purpose: Handles front end of VolunteerOrganizer application. With a Gooey
+based UI asking for volunteer positions, times, shift types, etc. For venue
+grid & shift list generation
+"""
 
 @Gooey(program_name="Venue Grid Generator")
 def parse_args():
