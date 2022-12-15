@@ -1,7 +1,14 @@
 from openpyxl.styles import PatternFill, Font, Alignment, Border, Side
 import openpyxl as pyxl
 from .ScheduleUI import parse_args
+"""
+Program: ScheduleORganizer.py
+Purpose: To automatically generate and format excel sheets as venue grids. Formatting
+an Excel spreadsheet(s) with a visual grid & separate shift list, automated with Excel
+formulas
+"""
 
+#HELPER FUNCTIONS
 #Cells: [date,venue,position,time], Sheet: Sheet Obj, Ref_Sheet: Reference Sheet Title, Vol_Cell: Value of Volunteer Cell
 def insert_sheet_list(cells,sheet,ref_sheet,vol_cell):
         sheet_call = ref_sheet.title
@@ -27,14 +34,14 @@ def insert_sheet_list(cells,sheet,ref_sheet,vol_cell):
                         cell_shift.value = "="+sheet_call+str(cells[0])+space_formula+sheet_call+str(cells[1])+space_formula+sheet_call+str(position_merge)+space_formula+sheet_call+str(time_value)
                         create_cell_border(cell_shift)
                         break
-#Helper function to create cell borders, given excel cell
+#Creates cell borders, given excel cell
 def create_cell_border(cell):
         thin_border = Border(left=Side(style='thin'), 
                      right=Side(style='thin'), 
                      top=Side(style='thin'), 
                      bottom=Side(style='thin'))
         cell.border = thin_border
-#Helper funtion that returns either 0 or 1, if a given cell is within the list of merged cells in a given sheet
+#Returns either 0 or 1, if a given cell is within the list of merged cells in a given sheet
 def is_merged(cell,sheet):
         merged = 0
         for mergedCell in sheet.merged_cells.ranges:
@@ -42,7 +49,8 @@ def is_merged(cell,sheet):
                         merged = 1
                         break
         return merged
-#Main Executed Function
+
+#MAIN FUNCTION
 if __name__ == '__main__':
     print("Creating Venue Schedule Grid")
     args = parse_args()
@@ -63,7 +71,7 @@ if __name__ == '__main__':
     wb.save(filename)
     pos_vols = [args.BG_Vols,args.FOH_Vols,args.GT_Vols,args.Hosp_Vols,args.Merch_Vols,args.Stage_Vols,args.Sec_Vols]
     pos_names = ['Beer Garden','Front of House','Green Team','Hospitality','Merchandise','Staging','Security']
-    #Pass all variables into excel spreadsheet generator program
+    #General Font & Alignment for venue grid
     font = Font(name='Calibri',
                 size=28,
                 bold=True,
