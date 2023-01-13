@@ -8,7 +8,6 @@ Purpose: Handles front end of VolunteerOrganizer application. With a Gooey
 based UI asking for volunteer positions, times, shift types, etc. For venue
 grid & shift list generation
 """
-
 @Gooey(program_name="Venue Grid Generator")
 def parse_args():
     """ Use GooeyParser to build up the arguments we will use in our script
@@ -25,10 +24,17 @@ def parse_args():
             stored_args = json.load(data_file)
     parser = GooeyParser(description='Produce a Venue Schedule')
     #Creating Dimensions for schedule grid
-    #File Name
-    parser.add_argument('File_Name',
+
+    #Target Excel file, either can select a pre-existing .xlsm file or generate a new one
+    parser.add_argument('--File_Name',
                         help = 'Select the target Microsoft Excel file (MUST be macro-enabled, as a .xlsm file).',
                         widget ='FileChooser' )
+    parser.add_argument("-o",
+                        "--Output_File",
+                        required=False,
+                        help="Path for coverted file",
+                        widget="FileSaver",
+                        gooey_options=dict(wildcard="Excel Macro-Enabled Workbook (.xlsm)|*.xlsm"))
     #Venue Name
     parser.add_argument('Venue_Name',
                         action='store',
@@ -80,9 +86,24 @@ def parse_args():
             action='store',
             widget='IntegerField',
             default=0,
-            help="Specify the number of security volunteers that will be present")      
+            help="Specify the number of security volunteers that will be present")
+    parser.add_argument('--FirstAid_Vols',
+            action='store',
+            widget='IntegerField',
+            default=0,
+            help="Specify the number of first aid volunteers that will be present")
+    parser.add_argument('--Site_Vols',
+            action='store',
+            widget='IntegerField',
+            default=0,
+            help="Specify the number of site volunteers that will be present")
+    parser.add_argument('--Office_Vols',
+            action='store',
+            widget='IntegerField',
+            default=0,
+            help="Specify the number of office volunteers that will be present")                   
     #Type of supervisors at venue
-    parser.add_argument('Supervisor_Positions',
+    parser.add_argument('--Supervisor_Positions',
                         choices=['Beer Garden','Front of House','Green Team','Hospitality','Merchandise','Staging','Security'],
                         action='store',
                         default=stored_args.get('Supervisor_Positons'),
@@ -92,7 +113,7 @@ def parse_args():
                         help='Specify the work positons for this venue')
     #Split shift for positions
     parser.add_argument('--Split_Shifts',
-                        choices=['Beer Garden','Front of House','Green Team','Hospitality','Merchandise','Staging','Security'],
+                        choices=['Beer Garden','Front of House','Green Team','Hospitality','Merchandise','Staging','Security','Office'],
                         action='store',
                         default=stored_args.get('Split_Shifts'),
                         widget='Listbox',
