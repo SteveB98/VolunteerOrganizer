@@ -1,131 +1,15 @@
-from gooey import Gooey, GooeyParser
-from openpyxl.styles import PatternFill, Font, Alignment, Border, Side
+from openpyxl.styles import PatternFill, Border, Side
 from openpyxl import Workbook
-import os
-import mkl
-import json
 import openpyxl as pyxl
-@Gooey(program_name="Venue Grid Generator")
-def parse_args():
-    """ Use GooeyParser to build up the arguments we will use in our script
-    Save the arguments in a default json file so that we can retrieve them
-    every time we run the script.
-    """
-    stored_args = {}
-    # get the script name without the extension & use it to build up the json filename
-    script_name = os.path.splitext(os.path.basename(__file__))[0]
-    args_file = "{}-args.json".format(script_name)
-    # Read in the prior arguments as a dictionary
-    if os.path.isfile(args_file):
-        with open(args_file) as data_file:
-            stored_args = json.load(data_file)
-    parser = GooeyParser(description='Produce a Venue Schedule')
-    #Creating Dimensions for schedule grid
-
-    #Target Excel file, either can select a pre-existing .xlsm file or generate a new one
-    parser.add_argument('--File_Name',
-                        help = 'Select the target Microsoft Excel file (MUST be macro-enabled, as a .xlsm file).',
-                        widget ='FileChooser' )
-    parser.add_argument("-o",
-                        "--Output_File",
-                        required=False,
-                        help="Path for coverted file",
-                        widget="FileSaver",
-                        gooey_options=dict(wildcard="Excel Macro-Enabled Workbook (.xlsm)|*.xlsm"))
-    #Venue Name
-    parser.add_argument('Venue_Name',
-                        action='store',
-                        default=stored_args.get('Venue_Name'),
-                        help='Specify the name of the venue, please use undercases for spaces')
-    #Shift Time
-    parser.add_argument('Shift_Time',
-                        action='store',
-                        default=stored_args.get('Shift_Time'),
-                        help='Specify the approximate shift length')
-    #Universal Shift Time Check
-    parser.add_argument('--Universal_Shift_Time',
-                        default=stored_args.get('Universal_Shift_Time'),
-                        help='Will this venue have a single shift time?',
-                        widget = 'CheckBox',
-                        action='store_true')
-    #Venue Positions, selected based on # of vols (if 0, then role is not needed)
-    parser.add_argument('--BG_Vols',
-                action='store',
-                widget='IntegerField',
-                default=0,
-                help="Specify the number of BG volunteers that will be present")
-    parser.add_argument('--FOH_Vols',
-            action='store',
-            widget='IntegerField',
-            default=0,
-            help="Specify the number of FOH volunteers that will be present")
-    parser.add_argument('--GT_Vols',
-            action='store',
-            widget='IntegerField',
-            default=0,
-            help="Specify the number of Green Team volunteers that will be present")
-    parser.add_argument('--Hosp_Vols',
-            action='store',
-            widget='IntegerField',
-            default=0,
-            help="Specify the number of hospitality volunteers that will be present")
-    parser.add_argument('--Merch_Vols',
-            action='store',
-            widget='IntegerField',
-            default=0,
-            help="Specify the number of merchandise volunteers that will be present")
-    parser.add_argument('--Stage_Vols',
-            action='store',
-            widget='IntegerField',
-            default=0,
-            help="Specify the number of staging volunteers that will be present")
-    parser.add_argument('--Sec_Vols',
-            action='store',
-            widget='IntegerField',
-            default=0,
-            help="Specify the number of security volunteers that will be present")
-    parser.add_argument('--FirstAid_Vols',
-            action='store',
-            widget='IntegerField',
-            default=0,
-            help="Specify the number of first aid volunteers that will be present")
-    parser.add_argument('--Site_Vols',
-            action='store',
-            widget='IntegerField',
-            default=0,
-            help="Specify the number of site volunteers that will be present")
-    parser.add_argument('--Office_Vols',
-            action='store',
-            widget='IntegerField',
-            default=0,
-            help="Specify the number of office volunteers that will be present")                   
-    #Type of supervisors at venue
-    parser.add_argument('--Supervisor_Positions',
-                        choices=['Beer Garden','Front of House','Green Team','Hospitality','Merchandise','Staging','Security'],
-                        action='store',
-                        default=stored_args.get('Supervisor_Positons'),
-                        widget='Listbox',
-                        nargs="+",
-                        metavar="Supervisor Positons",
-                        help='Specify the work positons for this venue')
-    #Split shift for positions
-    parser.add_argument('--Split_Shifts',
-                        choices=['Beer Garden','Front of House','Green Team','Hospitality','Merchandise','Staging','Security','Office'],
-                        action='store',
-                        default=stored_args.get('Split_Shifts'),
-                        widget='Listbox',
-                        nargs="+",
-                        metavar="Split_Shifts",
-                        help='Specify which work positions will have split shifts')
-    #Number of shows taking place at venue
-    parser.add_argument('--Number_of_Shows',
-                        action='store',
-                        default=1,
-                        widget='IntegerField',
-                        help="Specify the number of shows happening at this venue")
-    #Return parser function to main                    
-    return parser.parse_args()
-
+from ScheduleUI import parse_args
+from SheetFormat import title_font, bolded_font, supervisor_font, align
+"""
+Program: ScheduleOrganizer.py
+Purpose: Handles baclend openpyxl processing of Excel Workbooks
+and spreadsheets. Creates or savesr new workbook with user input from ScheduleUI.py
+with visual grids and conenciding shift sheets
+"""
+#FUNCTIONS:
 #Cells: [date,venue,position,time], Sheet: Sheet Obj, Ref_Sheet: Reference Sheet Title, Vol_Cell: Value of Volunteer Cell
 def insert_sheet_list(cells,sheet,ref_sheet,vol_cell):
         sheet_call = ref_sheet.title
@@ -193,29 +77,14 @@ if __name__ == '__main__':
     else:
         wb.create_sheet("ShiftList")
         sheet_list = wb['ShiftList']
-    #print(args.Split_Shifts)
-    print(filename)
     wb.save(filename)
     pos_vols = [args.BG_Vols,args.FOH_Vols,args.GT_Vols,args.Hosp_Vols,args.Merch_Vols,args.Stage_Vols,args.Sec_Vols,args.FirstAid_Vols,args.Site_Vols,args.Office_Vols]
     pos_names = ['Beer Garden','Front of House','Green Team','Hospitality','Merchandise','Staging','Security', 'First Aid','Site Crew', 'Office']
     #Pass all variables into excel spreadsheet generator program
-    font = Font(name='Calibri',
-                size=28,
-                bold=True,
-                italic=False,
-                underline='none',
-                strike=False,
-                color='FF000000')
-    align = Alignment(horizontal='center',
-                    vertical='bottom',
-                    text_rotation=0,
-                    wrap_text=True,
-                    shrink_to_fit=False,
-                    indent=0)
     #Using Column A as base cells, for chart formatting i.e. all formatting for merging and insertion will be done in column A
     #Make Venue Name & Shift List Headers
     sheet['A1'] = args.Venue_Name
-    sheet['A1'].font = font
+    sheet['A1'].font = title_font
     sheet['A1'].alignment = align
     sheet_list['A1'] = 'Volunteers'
     sheet_list['B1'] = 'Shifts'
@@ -236,6 +105,7 @@ if __name__ == '__main__':
         cell_date = cell.coordinate
         #Create Show Title Cell
         cell = sheet.cell(row=3,column=1+i, value= 'Insert Band Name Here')
+        cell.font = bolded_font
         create_cell_border(cell)
         #For every volunteer in a position, create a position, supervisor, and volunteer cells
         for vols in pos_vols:
@@ -249,6 +119,7 @@ if __name__ == '__main__':
                                 cell.value = pos_names[pos_index] #Inserting Volunteer Position into cell
                                 sheet.merge_cells(start_row=start+counter, start_column=1,end_row=start+counter,end_column=int(args.Number_of_Shows))
                                 sheet.cell(row=start+counter,column=1+i).alignment = align
+                                sheet.cell(row=start+counter,column=1+i).fill = PatternFill("solid", fgColor="FFC3A8")
                                 cell_position = cell.coordinate
                         else: cell_position = cell.coordinate
                         split_shift = True
@@ -269,16 +140,19 @@ if __name__ == '__main__':
                                 cell_time = cell.coordinate
                                 #Supervisor Insertion
                                 if args.Supervisor_Positions is not None and pos_names[pos_index] in args.Supervisor_Positions: 
-                                        sheet.cell(row=start+counter+1,column=1+i,value = pos_names[pos_index] + 'Insert supervisor name here')
+                                        sheet.cell(row=start+counter+1,column=1+i,value = 'Insert supervisor name here')
                                         create_cell_border(sheet.cell(row=start+counter+1,column=1+i))
+                                        sheet.cell(row=start+counter+1,column=1+i).fill = PatternFill("solid", fgColor="00FFCC99")
+                                        sheet.cell(row=start+counter+1,column=1+i).font = supervisor_font
                                         counter +=1
                                 cell_venue = sheet.cell(row=1,column=1)
                                 #Volunteer Insertion
                                 for j in range(int(vols)): 
                                         vol_cell = sheet.cell(row=start+counter+1+j,column=1+i,value = 'Insert volunteer name here')
                                         insert_sheet_list([cell_date,cell_venue.coordinate,cell_position,cell_time],sheet_list,sheet,vol_cell)
-                                        wb.save(filename)
                                         create_cell_border(sheet.cell(row=start+counter+1+j,column=1+i))
+                                        sheet.cell(row=start+counter+1+j,column=1+i).fill = PatternFill("solid", fgColor="0099CC00")
+                                        wb.save(filename)
                                 counter +=int(vols)+1
                                 if split_shift is False: break
                                 if args.Split_Shifts is None: break
