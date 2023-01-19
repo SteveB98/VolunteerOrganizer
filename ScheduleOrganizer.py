@@ -1,16 +1,20 @@
+import openpyxl as pyxl
 from openpyxl.styles import PatternFill, Border, Side
 from openpyxl import Workbook
-import openpyxl as pyxl
+import ScheduleUI
+import SheetFormat
 from ScheduleUI import parse_args
 from SheetFormat import title_font, bolded_font, supervisor_font, align
 """
 Program: ScheduleOrganizer.py
-Purpose: Handles baclend openpyxl processing of Excel Workbooks
+Purpose: Handles backend openpyxl processing of Excel Workbooks
 and spreadsheets. Creates or savesr new workbook with user input from ScheduleUI.py
 with visual grids and conenciding shift sheets
 """
 #FUNCTIONS:
-#Cells: [date,venue,position,time], Sheet: Sheet Obj, Ref_Sheet: Reference Sheet Title, Vol_Cell: Value of Volunteer Cell
+#Parameters: Cells ([date,venue,position,time]), Sheet (Sheet Obj), Ref_Sheet (Reference Sheet Title), Vol_Cell (Value of Volunteer Cell)
+#Purpose: With a passed through cell location, venue and shift list sheets, this function compiles direct reference Excel formulas from cells from a given
+#venue grid to the shift list. Taking the date, venue, work position, and time details for each shift & matching it with it's volunteer name. 
 def insert_sheet_list(cells,sheet,ref_sheet,vol_cell):
         sheet_call = ref_sheet.title
         space_formula = '&" "&'
@@ -37,7 +41,7 @@ def insert_sheet_list(cells,sheet,ref_sheet,vol_cell):
                         create_cell_border(cell_shift)
                         break
 
-#Helper function to create cell borders, given excel cell
+#Purpose: Helper function to create cell borders, given excel cell
 def create_cell_border(cell):
         thin_border = Border(left=Side(style='thin'), 
                      right=Side(style='thin'), 
@@ -45,7 +49,7 @@ def create_cell_border(cell):
                      bottom=Side(style='thin'))
         cell.border = thin_border
 
-#Helper funtion that returns either 0 or 1, if a given cell is within the list of merged cells in a given sheet
+#Purpose: Helper funtion that returns either 0 or 1, if a given cell is within the list of merged cells in a given sheet
 def is_merged(cell,sheet):
         merged = 0
         for mergedCell in sheet.merged_cells.ranges:
@@ -55,46 +59,46 @@ def is_merged(cell,sheet):
         return merged
 
 #Main Executed Function
-if __name__ == '__main__':
-    print("Creating Venue Schedule Grid")
-    args = parse_args()
-    if args.Output_File is None:
+# #if __name__ == '__main__':
+print("Creating Venue Schedule Grid")
+args = parse_args()
+if args.Output_File is None:
         filename = args.File_Name
         wb = pyxl.load_workbook(filename, read_only = False, keep_vba=True)
-    else:
+else:
         filename = args.Output_File
         wb = Workbook(filename)
         wb.save(filename)
         wb = pyxl.load_workbook(filename, read_only = False, keep_vba=True)
-    wb.save(filename)
-    if args.Venue_Name in wb.sheetnames: 
+wb.save(filename)
+if args.Venue_Name in wb.sheetnames: 
         print('Venue Name already used in spreadsheet, exiting generation process')
         exit()
-    else:
+else:
         wb.create_sheet(args.Venue_Name)
         sheet = wb[args.Venue_Name]
-    if "ShiftList" in wb.sheetnames: sheet_list = wb['ShiftList']
-    else:
+if "ShiftList" in wb.sheetnames: sheet_list = wb['ShiftList']
+else:
         wb.create_sheet("ShiftList")
         sheet_list = wb['ShiftList']
-    wb.save(filename)
-    pos_vols = [args.BG_Vols,args.FOH_Vols,args.GT_Vols,args.Hosp_Vols,args.Merch_Vols,args.Stage_Vols,args.Sec_Vols,args.FirstAid_Vols,args.Site_Vols,args.Office_Vols]
-    pos_names = ['Beer Garden','Front of House','Green Team','Hospitality','Merchandise','Staging','Security', 'First Aid','Site Crew', 'Office']
-    #Pass all variables into excel spreadsheet generator program
-    #Using Column A as base cells, for chart formatting i.e. all formatting for merging and insertion will be done in column A
-    #Make Venue Name & Shift List Headers
-    sheet['A1'] = args.Venue_Name
-    sheet['A1'].font = title_font
-    sheet['A1'].alignment = align
-    sheet_list['A1'] = 'Volunteers'
-    sheet_list['B1'] = 'Shifts'
-    create_cell_border(sheet['A1'])
-    sheet.column_dimensions['A'].width = len(args.Venue_Name) #Figure out good cell width value
-    sheet.row_dimensions[1].height = 30
-    sheet.merge_cells(start_row=1, start_column=1,end_row=1,end_column=int(args.Number_of_Shows))
-    sheet['A1'].fill = PatternFill("solid", fgColor="FFC3A8")
-    start = 4
-    for i in range(int(args.Number_of_Shows)):
+wb.save(filename)
+pos_vols = [args.BG_Vols,args.FOH_Vols,args.GT_Vols,args.Hosp_Vols,args.Merch_Vols,args.Stage_Vols,args.Sec_Vols,args.FirstAid_Vols,args.Site_Vols,args.Office_Vols]
+pos_names = ['Beer Garden','Front of House','Green Team','Hospitality','Merchandise','Staging','Security', 'First Aid','Site Crew', 'Office']
+#Pass all variables into excel spreadsheet generator program
+#Using Column A as base cells, for chart formatting i.e. all formatting for merging and insertion will be done in column A
+#Make Venue Name & Shift List Headers
+sheet['A1'] = args.Venue_Name
+sheet['A1'].font = title_font
+sheet['A1'].alignment = align
+sheet_list['A1'] = 'Volunteers'
+sheet_list['B1'] = 'Shifts'
+create_cell_border(sheet['A1'])
+sheet.column_dimensions['A'].width = len(args.Venue_Name) #Figure out good cell width value
+sheet.row_dimensions[1].height = 30
+sheet.merge_cells(start_row=1, start_column=1,end_row=1,end_column=int(args.Number_of_Shows))
+sheet['A1'].fill = PatternFill("solid", fgColor="FFC3A8")
+start = 4
+for i in range(int(args.Number_of_Shows)):
         #Counter keeps track of cell traversals in real time, for each column, resetting once a new column is selected
         counter = 0
         #pos_index is an internal counter for pos_names
@@ -107,7 +111,7 @@ if __name__ == '__main__':
         cell = sheet.cell(row=3,column=1+i, value= 'Insert Band Name Here')
         cell.font = bolded_font
         create_cell_border(cell)
-        #For every volunteer in a position, create a position, supervisor, and volunteer cells
+        #For every volunteer in a position, create a position, supervisor, and volunteer cells & insert 
         for vols in pos_vols:
                 if int(vols) !=0:
                         #Position Name Cell
@@ -159,10 +163,10 @@ if __name__ == '__main__':
                                 if pos_names[pos_index] in args.Split_Shifts: split_shift = False
                                 else: break
                 pos_index +=1
-    dims = {}
-    for row in sheet.rows:
+dims = {}
+for row in sheet.rows:
         for cell in row:
                 if cell.value: dims[cell.column_letter] = max((dims.get(cell.column_letter, 0), len(str(cell.value))))  
-    for col, value in dims.items(): sheet.column_dimensions[col].width = value
-    wb.save(filename)
-    print("Done")
+        for col, value in dims.items(): sheet.column_dimensions[col].width = value
+wb.save(filename)
+print("Done")
