@@ -26,105 +26,121 @@ def parse_args():
     #Creating Dimensions for schedule grid
 
     #Target Excel file, either can select a pre-existing .xlsm file or generate a new one
-    parser.add_argument('--File_Name',
+    parser.add_argument('--FileName',
+                        metavar='File Name',
                         help = 'Select the target Microsoft Excel file (MUST be macro-enabled, as a .xlsm file).',
                         widget ='FileChooser' )
     parser.add_argument("-o",
-                        "--Output_File",
+                        "--OutputFile",
                         required=False,
-                        help="Path for coverted file",
+                        help="Select a path for new Microsoft Excel File.",
                         widget="FileSaver",
+                        metavar = "Output File",
                         gooey_options=dict(wildcard="Excel Macro-Enabled Workbook (.xlsm)|*.xlsm"))
     #Venue Name
-    parser.add_argument('Venue_Name',
+    parser.add_argument('VenueName',
                         action='store',
                         default=stored_args.get('Venue_Name'),
-                        help='Specify the name of the venue, please use undercases for spaces')
+                        metavar = "Venue Name",
+                        help='Specify the name of the venue.')
     #Shift Time
-    parser.add_argument('Shift_Time',
+    parser.add_argument('ShiftTime',
                         action='store',
                         default=stored_args.get('Shift_Time'),
-                        help='Specify the approximate shift length')
+                        metavar = "Shift Time",
+                        help='Specify the approximate shift length.')
     #Universal Shift Time Check
-    parser.add_argument('--Universal_Shift_Time',
+    parser.add_argument('--UniversalShiftTime',
                         default=stored_args.get('Universal_Shift_Time'),
                         help='Will this venue have a single shift time?',
                         widget = 'CheckBox',
+                        metavar = "Universal Shift Time",
                         action='store_true')
     #Venue Positions, selected based on # of vols (if 0, then role is not needed)
-    parser.add_argument('--BG_Vols',
+    parser.add_argument('--BGVols',
                 action='store',
                 widget='IntegerField',
                 default=0,
-                help="Specify the number of BG volunteers that will be present")
-    parser.add_argument('--FOH_Vols',
+                metavar = "Beer Garden Volunteers",
+                help="Specify the number of beer garden volunteers that will be present.")
+    parser.add_argument('--FOHVols',
             action='store',
             widget='IntegerField',
             default=0,
-            help="Specify the number of FOH volunteers that will be present")
-    parser.add_argument('--GT_Vols',
+            metavar="Front of House Volunteers",
+            help="Specify the number of front of house volunteers that will be present.")
+    parser.add_argument('--GTVols',
             action='store',
             widget='IntegerField',
             default=0,
-            help="Specify the number of Green Team volunteers that will be present")
-    parser.add_argument('--Hosp_Vols',
+            metavar="Green Team Volunteers",
+            help="Specify the number of green team volunteers that will be present.")
+    parser.add_argument('--HospVols',
             action='store',
             widget='IntegerField',
             default=0,
-            help="Specify the number of hospitality volunteers that will be present")
-    parser.add_argument('--Merch_Vols',
+            metavar="Hospitality Volunteers",
+            help="Specify the number of hospitality volunteers that will be present.")
+    parser.add_argument('--MerchVols',
             action='store',
             widget='IntegerField',
             default=0,
-            help="Specify the number of merchandise volunteers that will be present")
-    parser.add_argument('--Stage_Vols',
+            metavar="Merchandise Volunteers",
+            help="Specify the number of merchandise volunteers that will be present.")
+    parser.add_argument('--StageVols',
             action='store',
             widget='IntegerField',
             default=0,
-            help="Specify the number of staging volunteers that will be present")
-    parser.add_argument('--Sec_Vols',
+            metavar="Staging Volunteers",
+            help="Specify the number of staging volunteers that will be present.")
+    parser.add_argument('--SecVols',
             action='store',
             widget='IntegerField',
             default=0,
-            help="Specify the number of security volunteers that will be present")
-    parser.add_argument('--FirstAid_Vols',
+            metavar="Security Volunteers",
+            help="Specify the number of security volunteers that will be present.")
+    parser.add_argument('--FirstAidVols',
             action='store',
             widget='IntegerField',
             default=0,
-            help="Specify the number of first aid volunteers that will be present")
-    parser.add_argument('--Site_Vols',
+            metavar = "First Aid Volunteers",
+            help="Specify the number of first aid volunteers that will be present.")
+    parser.add_argument('--SiteVols',
             action='store',
             widget='IntegerField',
             default=0,
-            help="Specify the number of site volunteers that will be present")
-    parser.add_argument('--Office_Vols',
+            metavar = "Site Crew Volunteers",
+            help="Specify the number of site crew volunteers that will be present.")
+    parser.add_argument('--OfficeVols',
             action='store',
             widget='IntegerField',
             default=0,
-            help="Specify the number of office volunteers that will be present")                   
+            metavar="Office Volunteers",
+            help="Specify the number of office volunteers that will be present.")                   
     #Type of supervisors at venue
-    parser.add_argument('--Supervisor_Positions',
+    parser.add_argument('--SupervisorPositions',
                         choices=['Beer Garden','Front of House','Green Team','Hospitality','Merchandise','Staging','Security'],
                         action='store',
                         default=stored_args.get('Supervisor_Positons'),
                         widget='Listbox',
                         nargs="+",
                         metavar="Supervisor Positons",
-                        help='Specify the work positons for this venue')
+                        help='Specify the supervisor work positons for this venue.')
     #Split shift for positions
-    parser.add_argument('--Split_Shifts',
+    parser.add_argument('--SplitShifts',
                         choices=['Beer Garden','Front of House','Green Team','Hospitality','Merchandise','Staging','Security','Office'],
                         action='store',
                         default=stored_args.get('Split_Shifts'),
                         widget='Listbox',
                         nargs="+",
-                        metavar="Split_Shifts",
-                        help='Specify which work positions will have split shifts')
+                        metavar="Split Shifts",
+                        help='Specify which work positions will have split shifts.')
     #Number of shows taking place at venue
-    parser.add_argument('--Number_of_Shows',
+    parser.add_argument('--NumberofShows',
                         action='store',
                         default=1,
                         widget='IntegerField',
-                        help="Specify the number of shows happening at this venue")
+                        metavar="Number of Shows",
+                        help="Specify the number of shows happening at this venue.")
     #Return parser function to main                    
     return parser.parse_args()
