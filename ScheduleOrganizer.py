@@ -25,7 +25,7 @@ def insert_sheet_list(cells,sheet,ref_sheet,vol_cell):
         sheet_call = sheet_call+"!"
         #Finding inital cell for position cells, does the same to time cells if universal shift time is required
         position_merge = [r for r in ref_sheet.merged_cells.ranges if cells[2] in r][0].start_cell.coordinate
-        if args.Universal_Shift_Time == True: time_value = [r for r in ref_sheet.merged_cells.ranges if cells[3] in r][0].start_cell.coordinate
+        if args.UniversalShiftTime == True: time_value = [r for r in ref_sheet.merged_cells.ranges if cells[3] in r][0].start_cell.coordinate
         else: time_value = cells[3]
         #Formatting excel formula & inserting into shift list sheet
         #Check if next cell is empty in name column, inserts name & shift info in adjacent cell-column
@@ -62,44 +62,44 @@ def is_merged(cell,sheet):
 # #if __name__ == '__main__':
 print("Creating Venue Schedule Grid")
 args = parse_args()
-if args.Output_File is None:
-        filename = args.File_Name
+if args.OutputFile is None:
+        filename = args.FileName
         wb = pyxl.load_workbook(filename, read_only = False, keep_vba=True)
 else:
-        filename = args.Output_File
+        filename = args.OutputFile
         wb = Workbook(filename)
         wb.save(filename)
         wb = pyxl.load_workbook(filename, read_only = False, keep_vba=True)
 wb.save(filename)
-if args.Venue_Name in wb.sheetnames: 
+if args.VenueName in wb.sheetnames: 
         print('Venue Name already used in spreadsheet, exiting generation process')
         exit()
 else:
-        wb.create_sheet(args.Venue_Name)
-        sheet = wb[args.Venue_Name]
+        wb.create_sheet(args.VenueName)
+        sheet = wb[args.VenueName]
 if "ShiftList" in wb.sheetnames: sheet_list = wb['ShiftList']
 else:
         wb.create_sheet("ShiftList")
         sheet_list = wb['ShiftList']
 wb.save(filename)
-pos_vols = [args.BG_Vols,args.FOH_Vols,args.GT_Vols,args.Hosp_Vols,args.Merch_Vols,args.Stage_Vols,args.Sec_Vols,args.FirstAid_Vols,args.Site_Vols,args.Office_Vols]
+pos_vols = [args.BGVols,args.FOHVols,args.GTVols,args.HospVols,args.MerchVols,args.StageVols,args.SecVols,args.FirstAidVols,args.SiteVols,args.OfficeVols]
 pos_names = ['Beer Garden','Front of House','Green Team','Hospitality','Merchandise','Staging','Security', 'First Aid','Site Crew', 'Office']
 #Pass all variables into excel spreadsheet generator program
 #Using Column A as base cells, for chart formatting i.e. all formatting for merging and insertion will be done in column A
 #Make Venue Name & Shift List Headers
-sheet['A1'] = args.Venue_Name
+sheet['A1'] = args.VenueName
 sheet['A1'].font = title_font
 sheet['A1'].alignment = align
 sheet_list['A1'] = 'Volunteers'
 sheet_list['B1'] = 'Shifts'
 create_cell_border(sheet['A1'])
-sheet.column_dimensions['A'].width = len(args.Venue_Name) #Figure out good cell width value
+sheet.column_dimensions['A'].width = len(args.VenueName) #Figure out good cell width value
 sheet.row_dimensions[1].height = 30
-sheet.merge_cells(start_row=1, start_column=1,end_row=1,end_column=int(args.Number_of_Shows))
+sheet.merge_cells(start_row=1, start_column=1,end_row=1,end_column=int(args.NumberofShows))
 sheet['A1'].fill = PatternFill("solid", fgColor="FFC3A8")
 start = 4
-for i in range(int(args.Number_of_Shows)):
-        #Counter keeps track of cell traversals in real time, for each column, resetting once a new column is selected
+for i in range(int(args.NumberofShows)):
+        #Counter keeps track of cell traversals (done via the conditional loops below) in real time, for each column, resetting once a new column is selected
         counter = 0
         #pos_index is an internal counter for pos_names
         pos_index = 0
@@ -121,7 +121,7 @@ for i in range(int(args.Number_of_Shows)):
                                 cell = sheet.cell(row=start+counter,column=1+i)
                                 create_cell_border(cell)
                                 cell.value = pos_names[pos_index] #Inserting Volunteer Position into cell
-                                sheet.merge_cells(start_row=start+counter, start_column=1,end_row=start+counter,end_column=int(args.Number_of_Shows))
+                                sheet.merge_cells(start_row=start+counter, start_column=1,end_row=start+counter,end_column=int(args.NumberofShows))
                                 sheet.cell(row=start+counter,column=1+i).alignment = align
                                 sheet.cell(row=start+counter,column=1+i).fill = PatternFill("solid", fgColor="FFC3A8")
                                 cell_position = cell.coordinate
@@ -133,17 +133,17 @@ for i in range(int(args.Number_of_Shows)):
                                 cell = sheet.cell(row=start+counter,column=1+i)
                                 merged = is_merged(cell,sheet)
                                 #Shift Time Cell Merge Requirement Check
-                                if args.Universal_Shift_Time == True and merged == 0:
+                                if args.UniversalShiftTime == True and merged == 0:
                                         create_cell_border(cell)
-                                        cell.value = args.Shift_Time
-                                        sheet.merge_cells(start_row=start+counter, start_column=1,end_row=start+counter,end_column=int(args.Number_of_Shows))
-                                if args.Universal_Shift_Time == None:
+                                        cell.value = args.ShiftTime
+                                        sheet.merge_cells(start_row=start+counter, start_column=1,end_row=start+counter,end_column=int(args.NumberofShows))
+                                if args.UniversalShiftTime == None:
                                         create_cell_border(cell)
-                                        cell.value = args.Shift_Time
+                                        cell.value = args.ShiftTime
                                 sheet.cell(row=start+counter,column=1+i).alignment = align
                                 cell_time = cell.coordinate
                                 #Supervisor Insertion
-                                if args.Supervisor_Positions is not None and pos_names[pos_index] in args.Supervisor_Positions: 
+                                if args.SupervisorPositions is not None and pos_names[pos_index] in args.SupervisorPositions: 
                                         sheet.cell(row=start+counter+1,column=1+i,value = 'Insert supervisor name here')
                                         create_cell_border(sheet.cell(row=start+counter+1,column=1+i))
                                         sheet.cell(row=start+counter+1,column=1+i).fill = PatternFill("solid", fgColor="00FFCC99")
@@ -158,9 +158,11 @@ for i in range(int(args.Number_of_Shows)):
                                         sheet.cell(row=start+counter+1+j,column=1+i).fill = PatternFill("solid", fgColor="0099CC00")
                                         wb.save(filename)
                                 counter +=int(vols)+1
+                                #Conditional statements for split shift argument, breaks while loop if current volunteer position is split, or
+                                #if no split shift is indicated for work position
                                 if split_shift is False: break
-                                if args.Split_Shifts is None: break
-                                if pos_names[pos_index] in args.Split_Shifts: split_shift = False
+                                if args.SplitShifts is None: break
+                                if pos_names[pos_index] in args.SplitShifts: split_shift = False
                                 else: break
                 pos_index +=1
 dims = {}
