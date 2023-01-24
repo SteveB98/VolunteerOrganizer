@@ -58,6 +58,14 @@ def is_merged(cell,sheet):
                         break
         return merged
 
+#Purpose: Helper function that returns a Excel spreadsheet given a desired sheet title and a Excel workbook object
+def create_shift_sheet(title,wb):
+        if title in wb.sheetnames: sheet = wb[title]
+        else:
+                wb.create_sheet(title)
+                sheet = wb[title]
+        return sheet
+
 #Main Executed Function
 # #if __name__ == '__main__':
 print("Creating Venue Schedule Grid")
@@ -77,10 +85,9 @@ if args.VenueName in wb.sheetnames:
 else:
         wb.create_sheet(args.VenueName)
         sheet = wb[args.VenueName]
-if "ShiftList" in wb.sheetnames: sheet_list = wb['ShiftList']
-else:
-        wb.create_sheet("ShiftList")
-        sheet_list = wb['ShiftList']
+        
+volunteer_list = create_shift_sheet("VolunteerShifts",wb)        
+supervisor_list = create_shift_sheet("SupervisorShifts",wb)  
 wb.save(filename)
 pos_vols = [args.BGVols,args.FOHVols,args.GTVols,args.HospVols,args.MerchVols,args.StageVols,args.SecVols,args.FirstAidVols,args.SiteVols,args.OfficeVols]
 pos_names = ['Beer Garden','Front of House','Green Team','Hospitality','Merchandise','Staging','Security', 'First Aid','Site Crew', 'Office']
@@ -90,8 +97,10 @@ pos_names = ['Beer Garden','Front of House','Green Team','Hospitality','Merchand
 sheet['A1'] = args.VenueName
 sheet['A1'].font = title_font
 sheet['A1'].alignment = align
-sheet_list['A1'] = 'Volunteers'
-sheet_list['B1'] = 'Shifts'
+volunteer_list['A1'] = 'Volunteers'
+volunteer_list['B1'] = 'Shifts'
+supervisor_list['A1'] = 'Supervisors'
+supervisor_list['B1'] = 'Shifts'
 create_cell_border(sheet['A1'])
 sheet.column_dimensions['A'].width = len(args.VenueName) #Figure out good cell width value
 sheet.row_dimensions[1].height = 30
@@ -143,17 +152,18 @@ for i in range(int(args.NumberofShows)):
                                 sheet.cell(row=start+counter,column=1+i).alignment = align
                                 cell_time = cell.coordinate
                                 #Supervisor Insertion
+                                cell_venue = sheet.cell(row=1,column=1)
                                 if args.SupervisorPositions is not None and pos_names[pos_index] in args.SupervisorPositions: 
-                                        sheet.cell(row=start+counter+1,column=1+i,value = 'Insert supervisor name here')
+                                        sup_cell = sheet.cell(row=start+counter+1,column=1+i,value = 'Insert supervisor name here')
+                                        insert_sheet_list([cell_date,cell_venue.coordinate,cell_position,cell_time],supervisor_list,sheet,sup_cell)
                                         create_cell_border(sheet.cell(row=start+counter+1,column=1+i))
                                         sheet.cell(row=start+counter+1,column=1+i).fill = PatternFill("solid", fgColor="00FFCC99")
                                         sheet.cell(row=start+counter+1,column=1+i).font = supervisor_font
                                         counter +=1
-                                cell_venue = sheet.cell(row=1,column=1)
                                 #Volunteer Insertion
                                 for j in range(int(vols)): 
                                         vol_cell = sheet.cell(row=start+counter+1+j,column=1+i,value = 'Insert volunteer name here')
-                                        insert_sheet_list([cell_date,cell_venue.coordinate,cell_position,cell_time],sheet_list,sheet,vol_cell)
+                                        insert_sheet_list([cell_date,cell_venue.coordinate,cell_position,cell_time],volunteer_list,sheet,vol_cell)
                                         create_cell_border(sheet.cell(row=start+counter+1+j,column=1+i))
                                         sheet.cell(row=start+counter+1+j,column=1+i).fill = PatternFill("solid", fgColor="0099CC00")
                                         wb.save(filename)
