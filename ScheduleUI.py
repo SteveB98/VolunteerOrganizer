@@ -42,7 +42,7 @@ def parse_args():
                         action='store',
                         default=stored_args.get('Venue_Name'),
                         metavar = "Venue Name",
-                        help='Specify the name of the venue.')
+                        help='Specify the name of the venue. No longer than 31 characters in length.')
     #Shift Time
     parser.add_argument('ShiftTime',
                         action='store',
