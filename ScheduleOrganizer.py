@@ -17,7 +17,7 @@ with visual grids and conenciding shift sheets
 #venue grid to the shift list. Taking the date, venue, work position, and time details for each shift & matching it with it's volunteer name. 
 def insert_sheet_list(cells,sheet,ref_sheet,vol_cell):
         sheet_call = ref_sheet.title
-        space_formula = '&" "&'
+        space_formula = '&", "&'
         #Apostrophe in Sheet title check, replace with double apostrophe if so
         if sheet_call.find("'") != -1: sheet_call = sheet_call.replace("'","\'\'")
         #Space check in sheet title, insert single quotes around title if so
@@ -90,7 +90,7 @@ volunteer_list = create_shift_sheet("VolunteerShifts",wb)
 supervisor_list = create_shift_sheet("SupervisorShifts",wb)  
 wb.save(filename)
 pos_vols = [args.BGVols,args.FOHVols,args.GTVols,args.HospVols,args.MerchVols,args.StageVols,args.SecVols,args.FirstAidVols,args.SiteVols,args.OfficeVols]
-pos_names = ['Beer Garden','Front of House','Green Team','Hospitality','Merchandise','Staging','Security', 'First Aid','Site Crew', 'Office']
+pos_names = ['Beer Garden','Front of House','Green Team','Hospitality','Merchandise','Site Crew','Security', 'First Aid','Setup/Teardown', 'Office','Survey']
 #Pass all variables into excel spreadsheet generator program
 #Using Column A as base cells, for chart formatting i.e. all formatting for merging and insertion will be done in column A
 #Make Venue Name & Shift List Headers
