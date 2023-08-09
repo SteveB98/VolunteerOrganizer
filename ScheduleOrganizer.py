@@ -89,7 +89,7 @@ else:
 volunteer_list = create_shift_sheet("VolunteerShifts",wb)        
 supervisor_list = create_shift_sheet("SupervisorShifts",wb)  
 wb.save(filename)
-pos_vols = [args.BGVols,args.FOHVols,args.GTVols,args.HospVols,args.MerchVols,args.StageVols,args.SecVols,args.FirstAidVols,args.SiteVols,args.OfficeVols]
+pos_vols = [args.BGVols,args.FOHVols,args.GTVols,args.HospVols,args.MerchVols,args.SiteVols,args.SecVols,args.FirstAidVols,args.SetupTeardownVols,args.OfficeVols,args.SurveyVols]
 pos_names = ['Beer Garden','Front of House','Green Team','Hospitality','Merchandise','Site Crew','Security', 'First Aid','Setup/Teardown', 'Office','Survey']
 #Pass all variables into excel spreadsheet generator program
 #Using Column A as base cells, for chart formatting i.e. all formatting for merging and insertion will be done in column A
@@ -104,10 +104,10 @@ supervisor_list['B1'] = 'Shifts'
 create_cell_border(sheet['A1'])
 sheet.column_dimensions['A'].width = len(args.VenueName) #Figure out good cell width value
 sheet.row_dimensions[1].height = 30
-sheet.merge_cells(start_row=1, start_column=1,end_row=1,end_column=int(args.NumberofShows))
+sheet.merge_cells(start_row=1, start_column=1,end_row=1,end_column=int(args.NumberofDays))
 sheet['A1'].fill = PatternFill("solid", fgColor="FFC3A8")
 start = 4
-for i in range(int(args.NumberofShows)):
+for i in range(int(args.NumberofDays)):
         #Counter keeps track of cell traversals (done via the conditional loops below) in real time, for each column, resetting once a new column is selected
         counter = 0
         #pos_index is an internal counter for pos_names
@@ -130,7 +130,7 @@ for i in range(int(args.NumberofShows)):
                                 cell = sheet.cell(row=start+counter,column=1+i)
                                 create_cell_border(cell)
                                 cell.value = pos_names[pos_index] #Inserting Volunteer Position into cell
-                                sheet.merge_cells(start_row=start+counter, start_column=1,end_row=start+counter,end_column=int(args.NumberofShows))
+                                sheet.merge_cells(start_row=start+counter, start_column=1,end_row=start+counter,end_column=int(args.NumberofDays))
                                 sheet.cell(row=start+counter,column=1+i).alignment = align
                                 sheet.cell(row=start+counter,column=1+i).fill = PatternFill("solid", fgColor="FFC3A8")
                                 cell_position = cell.coordinate
@@ -145,7 +145,7 @@ for i in range(int(args.NumberofShows)):
                                 if args.UniversalShiftTime == True and merged == 0:
                                         create_cell_border(cell)
                                         cell.value = args.ShiftTime
-                                        sheet.merge_cells(start_row=start+counter, start_column=1,end_row=start+counter,end_column=int(args.NumberofShows))
+                                        sheet.merge_cells(start_row=start+counter, start_column=1,end_row=start+counter,end_column=int(args.NumberofDays))
                                 if args.UniversalShiftTime == None:
                                         create_cell_border(cell)
                                         cell.value = args.ShiftTime
