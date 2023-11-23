@@ -8,7 +8,7 @@
 <img align="left" alt="Pandas" width="30px" style="padding-right:10px;" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/pandas/pandas-original.svg">
 <img align="left" alt="NumPY" width="30px" style="padding-right:10px;" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/numpy/numpy-original.svg">
 <img align="left" alt="VSCode" width="30px" style="padding-right:10px;" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/vscode/vscode-original.svg">
-
+<br #/>
 
 This project was done for prior employment for the organization of volunteer shifts for multiple music festival events using Microsoft Excel spreadsheets. With a short script written to modify Excel workbooks and a frontend UI, this application does the following:
 
@@ -20,7 +20,7 @@ This project was done for prior employment for the organization of volunteer shi
 
 ---
 ## Application Usage Summary
-<img alt="User Interface" src="https://github.com/SteveB98/VolunteerOrganizer/tree/main/Images/UI.png">
+![Alt User Interface] (https://github.com/SteveB98/VolunteerOrganizer/tree/main/Images/UI.png)
 When initializing the program, the UI appears requesting a target Excel workbook, either to create then or a pre-existing given directory path. Then, the user indicates the spreadsheet name and several details regarding an event such as the venue name, approximate time length, what volunteer work areas are required, and other details pertaining to scheduling and supervisor details. Once the form is complete, submit the information and the application will initiate the creation of the new spreadsheet and workbook if applicable.
 
 <img alt="User Interface" src="https://github.com/SteveB98/VolunteerOrganizer/tree/main/Images/Show_Schedule.png">
