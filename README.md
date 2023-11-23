@@ -2,6 +2,14 @@
 
 ## A functional Python-based spreadsheet software application that organizes visual grids and user-inputted data into a target Excel workbook, geared towards event organization utilizing volunteers.
 
+### :toolbox: Languages and Tools
+<img align="left" alt="Python" width="30px" style="padding-right:10px;" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg">
+<img align="left" alt="Anaconda" width="30px" style="padding-right:10px;" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/adonisjs/adonisjs-original.svg">
+<img align="left" alt="Pandas" width="30px" style="padding-right:10px;" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/pandas/pandas-original.svg">
+<img align="left" alt="NumPY" width="30px" style="padding-right:10px;" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/numpy/numpy-original.svg">
+<img align="left" alt="VSCode" width="30px" style="padding-right:10px;" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/vscode/vscode-original.svg">
+<br # />
+
 This project was done for prior employment for the organization of volunteer shifts for multiple music festival events using Microsoft Excel spreadsheets. With a short script written to modify Excel workbooks and a frontend UI, this application does the following:
 
 * Creates or modifies Excel workbooks of spreadsheets of different show schedules and shift sheets
@@ -10,4 +18,4 @@ This project was done for prior employment for the organization of volunteer shi
 * Deliminates supervisor and regular volunteers for an event, each with their own dedicated shift sheet
 * Code allows for the addition of new volunteer roles, requirements, and formatting of show schedule spreadsheets
 
-...
+---
