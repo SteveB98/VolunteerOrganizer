@@ -8,7 +8,7 @@
 <img align="left" alt="Pandas" width="30px" style="padding-right:10px;" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/pandas/pandas-original.svg">
 <img align="left" alt="NumPY" width="30px" style="padding-right:10px;" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/numpy/numpy-original.svg">
 <img align="left" alt="VSCode" width="30px" style="padding-right:10px;" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/vscode/vscode-original.svg">
-<br #/>
+<p>&nbsp;</p>
 
 This project was done for prior employment for the organization of volunteer shifts for multiple music festival events using Microsoft Excel spreadsheets. With a short script written to modify Excel workbooks and a frontend UI, this application does the following:
 
@@ -21,10 +21,21 @@ This project was done for prior employment for the organization of volunteer shi
 ---
 ## Application Usage Summary
 ![User Interface](Images/UI.png)
+<p>&nbsp;</p>
 When initializing the program, the UI appears requesting a target Excel workbook, either to create then or a pre-existing given directory path. Then, the user indicates the spreadsheet name and several details regarding an event such as the venue name, approximate time length, what volunteer work areas are required, and other details pertaining to scheduling and supervisor details. Once the form is complete, submit the information and the application will initiate the creation of the new spreadsheet and workbook if applicable.
 
 ![Show Schedule](Images/Show_Schedule.png)
+<p>&nbsp;</p>
 After successful completion, a new spreadsheet is created within a workbook with cell references to a corresponding volunteer shift spreadsheet for distribution purposes. Thus, you can insert new information for shift times, position names, and venue names to have that information automatically updated for a volunteer with that given shift and vice versa.
 
 ![Volunteer Shifts](/Images/Volunteer_Shifts.png)
+<p>&nbsp;</p>
 This sheet organizes volunteering details of a specific shift for a slotted volunteer. Having all required information for said volunteer in one place. This spreadsheet can then be modified for mail merge and other purposes.
+
+---
+##Installation Instructions
+1. Clone this project
+2. Setup a local directory for executable creation
+3. Setup a programming environment via Anaconda or similar with repositories .YML file
+4. 4.	Type/copy ‘pyinstaller --onefile --add-data "Your Working Directory Path" ScheduleOrganizer.py --name=NameHere’ and execute command
+5.	After the command completes, go to the ‘dist’ folder in the same file directory containing your new .exe file
